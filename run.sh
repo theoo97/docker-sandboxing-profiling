@@ -15,7 +15,7 @@ if [ "$1" == "no-sandbox" ]; then
 elif [ "$1" == "docker" ]; then
 	sudo docker run -ti docker-sandboxing-profiling:$2-workload $3
 elif [ "$1" == "gvisor" ]; then
-	sudo docker run --runtime=runc -ti docker-sandboxing-profiling:$2-workload $3
+	sudo docker run --runtime=runsc -ti docker-sandboxing-profiling:$2-workload $3
 fi
 
 cd ..
