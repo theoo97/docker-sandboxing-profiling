@@ -1,0 +1,48 @@
+There are 5 different workload types. Each workload type tests the interaction with a specific kernel part[https://www.tldp.org/LDP/sag/html/kernel-parts.html]. For each type of workload, 10 different workloads were designed, indexed from 1 to 10. The workloads are designed such that the time to execute them on the test machine is increasing linearly with the index: ExecutionTime[i] = const * i.
+
+Ref:
+https://elinux.org/images/5/5c/Lyon-stress-ng-presentation-oct-2019.pdf
+https://wiki.ubuntu.com/Kernel/Reference/stress-ng
+
+# Workload Type 1
+# CPU intensive
+# Component: processor, user space
+stress-ng --cpu 1 --cpu-ops 1358
+
+
+# Workload Type 2
+# Do multiple read and writes, sequentially and randomly with forced sync to disk.
+# Component: Local I/O
+sudo stress-ng --iomix 1 --iomix-ops 2500	# call sync from buffer cache to HDD
+
+
+# Workload Type 3
+# Open client and server processes and do lots of socket operations
+# Component: Network I/O
+stress-ng --sock 1 --sock-ops 2380		# socket operations - test networking
+
+# Workload Type 4
+# Create lots of processes
+# Component: process management
+stress-ng --fork 1 --fork-ops 6200
+stress-ng --exec 1 --exec-ops 650
+stress-ng --vfork 1 --vfork-ops 53000
+stress-ng --kill 1 --kill-ops 210000
+stress-ng --pthread 1 --pthread-ops 16800
+
+
+
+# Workload type 5
+# Component: Memory management
+stress-ng --brk 1 --brk-ops 333000
+stress-ng --stack 1 --stack-ops 2490
+stress-ng --bigheap 1 --bigheap-ops 22900
+stress-ng --vm 1 --vm-ops 45000
+stress-ng --malloc 1 --malloc-ops 1095000
+stress-ng --shm --shm-ops 1000
+
+
+
+
+
+
