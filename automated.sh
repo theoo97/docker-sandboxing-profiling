@@ -32,10 +32,7 @@ do
 	for SANDBOX in $SANDBOXES
 	do
 		run $WORKLOAD $SANDBOX
+		sleep 15
 	done
 done
-
-echo $base_ops
-echo "runtimes=[${runtimes[@]}]" | sed 's/ /, /g'
-
 

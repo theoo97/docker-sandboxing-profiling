@@ -16,6 +16,8 @@ elif [ "$1" == "docker" ]; then
 	sudo docker run -ti docker-sandboxing-profiling:$2-workload $3
 elif [ "$1" == "gvisor" ]; then
 	sudo docker run --runtime=runsc -ti docker-sandboxing-profiling:$2-workload $3
+elif [ "$1" == "kata" ]; then
+	sudo docker run --runtime=kata-runtime -ti docker-sandboxing-profiling:$2-workload $3
 fi
 
 cd ..
