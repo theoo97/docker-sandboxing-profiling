@@ -14,7 +14,7 @@ measurements={
 
 'memory-management': {
     'no-sandbox': [2.50, 1.57, 6.17, 4.88, 5.41, 2.90, 7.08, 5.18, 7.97, 8.26, 8.85, 9.82, 7.13, 6.77, 4.08, 13.49, 10.73, 15.20, 16.11],
-    'docker': [14.31, 1.23, 1.32, 1.31, 1.40, 1.64, 1.62, 1.68, 1.79, 1.87, 1.97, 2.08, 2.08, 2.75, 2.24, 2.33, 2.43, 2.49, 2.58],
+    'docker': [1.18, 1.23, 1.32, 1.31, 1.40, 1.64, 1.62, 1.68, 1.79, 1.87, 1.97, 2.08, 2.08, 2.75, 2.24, 2.33, 2.43, 2.49, 2.58],
     'gvisor': [3.05, 1.82, 1.97, 2.20, 2.28, 2.44, 2.56, 2.79, 2.91, 3.01, 3.18, 3.18, 3.40, 4.04, 4.33, 4.50, 4.00, 4.07, 4.18],
     'kata': [4.66, 4.73, 4.80, 4.90, 5.17, 5.21, 5.30, 5.42, 5.48, 5.58, 5.65, 5.74, 5.80, 5.94, 5.96, 6.00, 6.13, 6.26, 6.32],
     'firecracker': [55.92, 68.30, 60.89, 78.32, 79.46, 112.26, 80.95, 106.93, 114.53, 161.91, 153.43, 127.27, 157.76, 181.92, 167.71, 193.89, 187.94, 160.06, 153.22]
@@ -84,15 +84,15 @@ def regression(runtimes):
     mse=metrics.mean_squared_error(runtimes, y_predict)
     rmse = round(np.sqrt(mse), 2)
 
-    a = reg.coef_[0][0]
-    b = reg.intercept_[0]
+    a = round(reg.coef_[0][0], 2)
+    b = round(reg.intercept_[0], 2)
 
     return y_predict, a, b, rmse
 
-fig, axs = plt.subplots(2, 3)
+fig, axs = plt.subplots(2, 2)
+title_font_size=11
 
 def process_subplot(ax, component, env, title):
-    title_font_size=11
 
     ax.set_title(title, fontsize=title_font_size)
     ax.scatter(ops, measurements[component][env])
@@ -100,32 +100,40 @@ def process_subplot(ax, component, env, title):
     y_predict, a, b, rmse = regression(measurements[component][env])
     ax.plot(x_new, y_predict)
 
+    ax.text(x_new[-1] + 0.1, y_predict[-1] + 0.1, env)
     ax.axis('tight')
+
+    print("T_%s_%s(ops)= %f * ops + %f" % (component, env, a, b))
 
     return a, b, rmse
 
 
+title1='No Sandbox, Docker - T(ops) - measured in seconds'
+title2='gVisor, Kata, Firecracker - T(ops) - measured in seconds'
 
-a_no_sandbox, b_no_sandbox, rmse = process_subplot(axs[0, 0], 'cpu', 'no-sandbox', 'No Sandbox')
-a_docker, b_docker, rmse = process_subplot(axs[0, 0], 'cpu', 'docker', 'Docker')
-a_gvisor, b_gvisor, rmse = process_subplot(axs[0, 0], 'cpu', 'gvisor', 'gVisor')
-a_kata, b_kata, rmse = process_subplot(axs[0, 0], 'cpu', 'kata', 'Kata')
-a_firecracker, b_firecracker, rmse = process_subplot(axs[0, 0], 'cpu', 'firecracker', 'Firecracker')
+component='cpu'
+a_no_sandbox, b_no_sandbox, rmse = process_subplot(axs[0, 0], component, 'no-sandbox', title1)
+a_docker, b_docker, rmse = process_subplot(axs[0, 0], component, 'docker', title1)
+a_gvisor, b_gvisor, rmse = process_subplot(axs[0, 1], component, 'gvisor', title2)
+a_kata, b_kata, rmse = process_subplot(axs[0, 1], component, 'kata', title2)
+a_firecracker, b_firecracker, rmse = process_subplot(axs[0, 1], component, 'firecracker', title2)
 
 print(b_no_sandbox)
 
 
 
 
-langs = ['no-sandbox', 'Docker', 'gVisor', 'Kata', 'Firecracker']
-students = [b_no_sandbox, b_docker, b_gvisor, b_kata, b_firecracker]
-axs[1, 2].bar(langs,students)
+environments = ['no-sandbox', 'Docker', 'gVisor', 'Kata', 'Firecracker']
+y_intercept = [b_no_sandbox, b_docker, b_gvisor, b_kata, b_firecracker]
+axs[1, 0].bar(environments, y_intercept)
+axs[1, 0].set_title("Y intercepts (seconds)", fontsize=title_font_size)
 
-langs = ['no-sandbox', 'Docker', 'gVisor', 'Kata', 'Firecracker']
-students = [a_no_sandbox, a_docker, a_gvisor, a_kata, a_firecracker]
-barlist=axs[1, 1].bar(langs,students)
-barlist[0].set_color('r')
-barlist[1].set_color('b')
+
+environments = ['no-sandbox', 'Docker', 'gVisor', 'Kata', 'Firecracker']
+slopes = [a_no_sandbox, a_docker, a_gvisor, a_kata, a_firecracker]
+barlist=axs[1, 1].bar(environments, slopes)
+axs[1, 1].set_title("Slopes (seconds)", fontsize=title_font_size)
+
 
 plt.show()
 
